@@ -32,4 +32,12 @@ class AuthCoordinator: Coordinator {
     func didLogin() {
         parentCoordinator?.didLogin()
     }
+    
+    func didRegister(email: String) {
+        navigationController.popViewController(animated: true)
+        
+        if let loginController = navigationController.viewControllers.first as? LoginViewController {
+            loginController.prefillEmail(email: email)
+        }
+    }
 }

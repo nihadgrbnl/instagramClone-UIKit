@@ -155,6 +155,7 @@ class RegisterViewController: BaseController {
         return btn
     }()
     
+    private let viewModel = RegisterViewModel()
     weak var coordinator: AuthCoordinator?
     
     
@@ -256,6 +257,20 @@ class RegisterViewController: BaseController {
         return tf
     }
     
+    override func configureViewModel() {
+        viewModel.onRegisterSuccess = {
+            DispatchQueue.main.async {
+                self.coordinator?.didRegister(email: self.viewModel.email)
+            }
+        }
+        
+        viewModel.onRegisterError = { errorMessage in
+            DispatchQueue.main.async {
+                print(errorMessage)
+            }
+        }
+    }
+    
     
     @objc private func togglePasswordVisibility() {
         passwordTextField.isSecureTextEntry.toggle()
@@ -264,7 +279,11 @@ class RegisterViewController: BaseController {
     }
     
     @objc private func signUpTapped() {
-        
+        viewModel.email = emailTextField.text ?? ""
+        viewModel.fullName = fullNameTextField.text ?? ""
+        viewModel.username = usernameTextField.text ?? ""
+        viewModel.password = passwordTextField.text ?? ""
+        viewModel.register()
     }
     
     @objc private func loginTapped() {

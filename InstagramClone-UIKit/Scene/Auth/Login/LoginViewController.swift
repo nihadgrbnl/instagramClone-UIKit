@@ -235,6 +235,11 @@ class LoginViewController: BaseController {
         }
     }
     
+    func prefillEmail(email: String) {
+        emailTextField.text = email
+        viewModel.email = email
+    }
+    
     @objc private func togglePasswordVisibility() {
         passwordTextField.isSecureTextEntry.toggle()
         let imageName = passwordTextField.isSecureTextEntry ? "eye.slash" : "eye"
