@@ -33,8 +33,6 @@ class MainCoordinator: Coordinator {
         let profileNav = makeNav(root: profileController, title: "Profile", image: "person.circle", selectedImage: "person.circle.fill")
         
         
-        
-        
         tabBarController.viewControllers = [feedNav, searchNav, uploadNav, dmNav, profileNav]
         tabBarController.coordinator = self
     }
@@ -49,7 +47,7 @@ class MainCoordinator: Coordinator {
         return nav
     }
     
-    func goToChat(user: User) {
+    func goToChat(message: RecentMessages) {
         
     }
     

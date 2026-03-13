@@ -21,6 +21,7 @@ class DMInboxViewModel {
     func fetchRecentMessages () {
         repository.fetchRecentMessages { [weak self] messages in
             guard let self = self else { return }
+            print("Gelen mesaj sayısı: \(messages.count)")
             self.recentMessages = messages
             self.onDataUpdated?()
         }
