@@ -23,19 +23,19 @@ class MainCoordinator: Coordinator {
         let feedController = FeedController()
         let searchController = SearchController()
         let uploadController = UploadController()
-        let profileController = ProfileController()
         let dmController = DMInboxController()
+        let profileController = ProfileController()
         
         let feedNav = makeNav(root: feedController, title: "Home", image: "house", selectedImage: "house.fill")
         let searchNav = makeNav(root: searchController, title: "Search", image: "magnifyingglass", selectedImage: "magnifyingglass")
         let uploadNav = makeNav(root: uploadController, title: "", image: "plus.app", selectedImage: "plus.app.fill")
-        let profileNav = makeNav(root: profileController, title: "Profile", image: "person.circle", selectedImage: "person.circle.fill")
         let dmNav = makeNav(root: dmController, title: "Messages", image: "message", selectedImage: "message.fill")
+        let profileNav = makeNav(root: profileController, title: "Profile", image: "person.circle", selectedImage: "person.circle.fill")
         
         
         
         
-        tabBarController.viewControllers = [feedNav, searchNav, uploadNav, profileNav, dmNav]
+        tabBarController.viewControllers = [feedNav, searchNav, uploadNav, dmNav, profileNav]
         tabBarController.coordinator = self
     }
     
