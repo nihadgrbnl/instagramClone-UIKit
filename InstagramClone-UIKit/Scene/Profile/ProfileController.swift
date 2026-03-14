@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ProfileController: DMInboxController {
+class ProfileController: BaseController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
