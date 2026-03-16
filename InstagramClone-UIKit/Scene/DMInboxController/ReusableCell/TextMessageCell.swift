@@ -47,6 +47,10 @@ class TextMessageCell: UICollectionViewCell {
     
     private var bubbleLeadingConstraints: NSLayoutConstraint!
     private var bubbleTrailingConstraints: NSLayoutConstraint!
+    private var timeLabelLeadingConstraint: NSLayoutConstraint?
+    private var timeLabelTrailingConstraint: NSLayoutConstraint?
+    
+    private var isCurrentUser: Bool = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,14 +73,14 @@ class TextMessageCell: UICollectionViewCell {
             avatarImageView.widthAnchor.constraint(equalToConstant: 32),
             avatarImageView.heightAnchor.constraint(equalToConstant: 32),
             
+            bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+            
             messageLabel.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 10),
             messageLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -10),
             messageLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
             messageLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
             messageLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 260),
-            
-            bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
-            bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             
             timeLabel.topAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: 3),
             timeLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -2),
@@ -86,12 +90,22 @@ class TextMessageCell: UICollectionViewCell {
         bubbleTrailingConstraints = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if bubbleView.layer.mask != nil {
+            applyBubbleShape()
+        }
+    }
+    
     func configure(message: Message, isCurrentUser: Bool) {
+        self.isCurrentUser = isCurrentUser
         messageLabel.text = message.content
         timeLabel.text = message.timeStamp.formatted(date: .omitted, time: .shortened)
         
         bubbleLeadingConstraints.isActive = false
         bubbleTrailingConstraints.isActive = false
+        timeLabelLeadingConstraint?.isActive = false
+        timeLabelTrailingConstraint?.isActive = false
         
         if isCurrentUser {
             bubbleView.backgroundColor = UIColor(resource: .igPurple)
@@ -102,9 +116,9 @@ class TextMessageCell: UICollectionViewCell {
             bubbleLeadingConstraints = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 60)
             bubbleLeadingConstraints.isActive = true
             
-            timeLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor).isActive = true
+            timeLabelTrailingConstraint = timeLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor)
+            timeLabelTrailingConstraint?.isActive = true
             
-            applyBubbleShape(isCurrentUser: true)
         } else {
             bubbleView.backgroundColor = UIColor(resource: .igInputBackground)
             messageLabel.textColor = UIColor(resource: .igText)
@@ -114,15 +128,13 @@ class TextMessageCell: UICollectionViewCell {
             bubbleTrailingConstraints = bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -60)
             bubbleTrailingConstraints.isActive = true
             
-            timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor).isActive = true
-            
-            applyBubbleShape(isCurrentUser: false)
+            timeLabelLeadingConstraint = timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor)
+            timeLabelLeadingConstraint?.isActive = true
         }
+        bubbleView.layer.mask = CAShapeLayer()
     }
     
-    private func applyBubbleShape(isCurrentUser: Bool) {
-        bubbleView.layoutIfNeeded()
-        
+    private func applyBubbleShape() {
         let corners: UIRectCorner = isCurrentUser ?
         [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight]
         
@@ -141,5 +153,7 @@ class TextMessageCell: UICollectionViewCell {
         super.prepareForReuse()
         bubbleView.layer.mask = nil
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
+        timeLabelLeadingConstraint?.isActive = false
+        timeLabelTrailingConstraint?.isActive = false
     }
 }

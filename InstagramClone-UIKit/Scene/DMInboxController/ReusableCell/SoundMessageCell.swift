@@ -93,6 +93,8 @@ class SoundMessageCell: UICollectionViewCell {
     private var timeLabelLeadingConstraint: NSLayoutConstraint?
     private var timeLabelTrailingConstraint: NSLayoutConstraint?
     
+    private var isCurrentUser: Bool = false
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureConstraints()
@@ -155,10 +157,13 @@ class SoundMessageCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        applyBubbleShape()
+        if bubbleView.layer.mask != nil {
+            applyBubbleShape()
+        }
     }
     
     func configure(message: Message, isCurrentUser: Bool, duration: Double) {
+        self.isCurrentUser = isCurrentUser
         timeLabel.text = message.timeStamp.formatted(date: .omitted, time: .shortened)
         slider.maximumValue = Float(duration > 0 ? duration : 1.0)
         durationLabel.text = formatTime(duration)
@@ -218,7 +223,6 @@ class SoundMessageCell: UICollectionViewCell {
     
     private func applyBubbleShape() {
         guard bubbleView.bounds != .zero else { return }
-        let isCurrentUser = !avatarImageView.isHidden == false
         let corners: UIRectCorner = isCurrentUser
         ? [.topLeft, .topRight, .bottomLeft]
         : [.topLeft, .topRight, .bottomRight]
@@ -255,5 +259,7 @@ class SoundMessageCell: UICollectionViewCell {
         playPauseBtn.setImage(UIImage(systemName: "play.fill"), for: .normal)
         playPauseBtn.isHidden = false
         loadingIndicator.stopAnimating()
+        timeLabelLeadingConstraint?.isActive = false
+        timeLabelTrailingConstraint?.isActive = false
     }
 }

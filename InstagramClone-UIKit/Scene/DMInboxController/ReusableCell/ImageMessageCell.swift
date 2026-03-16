@@ -59,6 +59,10 @@ class ImageMessageCell: UICollectionViewCell {
     
     private var bubbleLeadingConstraint: NSLayoutConstraint!
     private var bubbleTrailingConstraint: NSLayoutConstraint!
+    private var timeLabelLeadingConstraint: NSLayoutConstraint?
+    private var timeLabelTrailingConstraint: NSLayoutConstraint?
+    
+    private var isCurrentUser: Bool = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -106,26 +110,36 @@ class ImageMessageCell: UICollectionViewCell {
         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if bubbleView.layer.mask != nil {
+            applyBubbleShape()
+        }
+    }
+    
     func configure(message: Message, isCurrentUser: Bool) {
+        self.isCurrentUser = isCurrentUser
         timeLabel.text = message.timeStamp.formatted(date: .omitted, time: .shortened)
         
         bubbleLeadingConstraint.isActive = false
         bubbleTrailingConstraint.isActive = false
+        timeLabelLeadingConstraint?.isActive = false
+        timeLabelTrailingConstraint?.isActive = false
         
         if isCurrentUser {
             avatarImageView.isHidden = true
             bubbleTrailingConstraint.isActive = true
             bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 60)
             bubbleLeadingConstraint.isActive = true
-            timeLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor).isActive = true
-            applyBubbleShape(isCurrentUser: true)
+            timeLabelTrailingConstraint = timeLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor)
+            timeLabelTrailingConstraint?.isActive = true
         } else {
             avatarImageView.isHidden = false
             bubbleLeadingConstraint.isActive = true
             bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -60)
             bubbleTrailingConstraint.isActive = true
-            timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor).isActive = true
-            applyBubbleShape(isCurrentUser: false)
+            timeLabelLeadingConstraint = timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor)
+            timeLabelLeadingConstraint?.isActive = true
         }
         
         loadingIndicator.startAnimating()
@@ -133,11 +147,11 @@ class ImageMessageCell: UICollectionViewCell {
         messageImageView.setImage(urlString: message.content) { [weak self] _ in
             self?.loadingIndicator.stopAnimating()
         }
+        bubbleView.layer.mask = CAShapeLayer()
     }
     
-    private func applyBubbleShape(isCurrentUser: Bool) {
+    private func applyBubbleShape() {
         
-        bubbleView.layoutIfNeeded()
         let corners: UIRectCorner = isCurrentUser
         ? [.topLeft, .topRight, .bottomLeft]
         : [.topLeft, .topRight, .bottomRight]
@@ -163,5 +177,7 @@ class ImageMessageCell: UICollectionViewCell {
         bubbleView.layer.mask = nil
         loadingIndicator.stopAnimating()
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
+        timeLabelLeadingConstraint?.isActive = false
+        timeLabelTrailingConstraint?.isActive = false
     }
 }
