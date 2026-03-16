@@ -84,13 +84,13 @@ class FirebaseRepository : ChatRepository {
                         print("☁️ FIREBASE: Yeni mesaj ağdan geldi -> Core Data'ya kaydediliyor...")
                         
                         //Get audio file from firebase storage
-                        var audioFileFromFirebaseStorage = "AudioFileFirebaseStorage"
+//                        var audioFileFromFirebaseStorage = "AudioFileFirebaseStorage"
                         
                         //Elave funksiya, audio  yazirsan file storage (device)
-                        var newPath = "newPath" //write function return newPath of audioFile
+//                        var newPath = "newPath" //write function return newPath of audioFile
                         
                         //Write to local database (id, filepath, audio)
-                        var entity = "messageId, audioFileFromFirebaseStorage, newPath"
+//                        var entity = "messageId, audioFileFromFirebaseStorage, newPath"
                         
                         
                         self.localRepository.save(chatID: chatID, model: message)

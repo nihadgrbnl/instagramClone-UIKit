@@ -57,7 +57,7 @@ class ChatViewModel {
         }
     }
     
-    func sendMessage(type: MessageType, content: String, chatID: String, duration: Double?) {
+    func sendMessage(type: MessageType, content: String, duration: Double? = nil) {
         guard let currentUser = currentUser,
               let chatUser = chatUser else { return }
         repository.sendMessages(type: type,
@@ -76,5 +76,45 @@ class ChatViewModel {
         }
     }
     
-    func sendVoice
+    func sendImageMessage(imageData: Data) {
+        guard let currentUser = currentUser,
+              let chatUser = chatUser else { return }
+        repository.uploadImage(imageData: imageData,
+                               chatID: chatID) { [weak self] urlString, error in
+            if let error {
+                print("image upload error: \(error.localizedDescription)")
+                return
+            }
+            guard let urlString = urlString, let self = self else { return }
+            self.repository.sendMessages(type: .image,
+                                         content: urlString,
+                                         chatID: chatID,
+                                         duration: nil,
+                                         currentUser: currentUser,
+                                         chatUser: chatUser) { _, _ in }
+        }
+    }
+    
+    func sendVoiceMessages(localAudioURL: URL, duration: Double) {
+        guard let currentUser = currentUser,
+              let chatUser = chatUser else { return }
+        repository.uploadAudio(audioURL: localAudioURL,
+                               chatID: chatID) { [weak self] urlString, error in
+            guard let urlString = urlString, let self = self else { return }
+            self.repository.sendMessages(type: .voice,
+                                         content: urlString,
+                                         chatID: chatID,
+                                         duration: duration,
+                                         currentUser: currentUser,
+                                         chatUser: chatUser) { _,_ in }
+        }
+    }
+    
+    func markAsRead() {
+        guard let chatUser = chatUser else { return }
+        repository.markAsRead(otherUserID: chatUser.id) { success in
+            if success { print("Mesajlar okundu isaretlendi.") }
+        }
+    }
+    
 }
