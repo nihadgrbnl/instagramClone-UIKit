@@ -50,6 +50,7 @@ class TextMessageCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        configureConstraints()
     }
     
     required init?(coder: NSCoder) {
@@ -141,5 +142,4 @@ class TextMessageCell: UICollectionViewCell {
         bubbleView.layer.mask = nil
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
     }
-    
 }
