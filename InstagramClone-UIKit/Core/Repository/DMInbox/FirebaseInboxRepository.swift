@@ -25,7 +25,6 @@ class FirebaseInboxRepository: InboxRepository {
                     guard document.documentID != currentUserID else { return nil }
                     return try? document.data(as: RecentMessages.self)
                 }
-                
                 DispatchQueue.main.async {
                     completion(recentMessages)
                 }
