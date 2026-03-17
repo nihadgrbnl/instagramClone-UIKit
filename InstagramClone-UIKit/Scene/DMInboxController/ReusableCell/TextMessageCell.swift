@@ -62,12 +62,15 @@ class TextMessageCell: UICollectionViewCell {
     }
     
     private func configureConstraints() {
+        
         contentView.addSubview(avatarImageView)
         contentView.addSubview(bubbleView)
         bubbleView.addSubview(messageLabel)
         contentView.addSubview(timeLabel)
         
         NSLayoutConstraint.activate([
+            contentView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width),
+            
             avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             avatarImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             avatarImageView.widthAnchor.constraint(equalToConstant: 32),
@@ -88,13 +91,6 @@ class TextMessageCell: UICollectionViewCell {
         
         bubbleLeadingConstraints = bubbleView.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 8)
         bubbleTrailingConstraints = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if bubbleView.layer.mask != nil {
-            applyBubbleShape()
-        }
     }
     
     func configure(message: Message, isCurrentUser: Bool) {
@@ -131,29 +127,23 @@ class TextMessageCell: UICollectionViewCell {
             timeLabelLeadingConstraint = timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor)
             timeLabelLeadingConstraint?.isActive = true
         }
-        bubbleView.layer.mask = CAShapeLayer()
+        applyBubbleShape()
     }
     
     private func applyBubbleShape() {
-        let corners: UIRectCorner = isCurrentUser ?
-        [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight]
-        
-        let path = UIBezierPath(
-            roundedRect: bubbleView.bounds,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: 16, height: 16)
-        )
-        
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        bubbleView.layer.mask = mask
+        bubbleView.layer.cornerRadius = 16
+        bubbleView.clipsToBounds = true
+        bubbleView.layer.maskedCorners = isCurrentUser
+        ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner]
+        : [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner]
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        bubbleView.layer.mask = nil
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
         timeLabelLeadingConstraint?.isActive = false
         timeLabelTrailingConstraint?.isActive = false
+        bubbleLeadingConstraints.isActive = false
+        bubbleTrailingConstraints.isActive = false
     }
 }

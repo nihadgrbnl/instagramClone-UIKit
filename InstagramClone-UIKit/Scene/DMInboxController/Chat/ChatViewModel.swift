@@ -16,6 +16,7 @@ class ChatViewModel {
     var currentUser: User?
     
     var onDataUpdated: (() -> Void)?
+    var onUserLoaded: (() -> Void)?
     
     private let repository: ChatRepository
     private let localRepostiory: MessageLocalDataSource
@@ -34,6 +35,9 @@ class ChatViewModel {
         repository.fetchUsers(otherUserID: otherUserID) { [weak self] fetchedCurrentUser, fetchedChatUser in
             self?.currentUser = fetchedCurrentUser
             self?.chatUser = fetchedChatUser
+            DispatchQueue.main.async {
+                self?.onUserLoaded?()
+            }
         }
     }
     
@@ -51,6 +55,7 @@ class ChatViewModel {
             guard let self = self else { return }
             DispatchQueue.main.async {
                 let fetched = self.localRepostiory.fetch(chatID: chatID)
+                print("Mesaj sayisi: \(fetched.count)")
                 self.messages = fetched
                 self.onDataUpdated?()
             }

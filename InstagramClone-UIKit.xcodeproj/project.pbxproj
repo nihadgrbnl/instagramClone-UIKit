@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		201FE98C2F68253E004E9A56 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 201FE98B2F68253E004E9A56 /* Kingfisher */; };
+		201FE9972F697CE7004E9A56 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 201FE9962F697CE7004E9A56 /* IQKeyboardManagerSwift */; };
 		2046FE902F618EDF00F65741 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2046FE8F2F618EDF00F65741 /* FirebaseAuth */; };
 		2046FE922F618EDF00F65741 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2046FE912F618EDF00F65741 /* FirebaseFirestore */; };
 		2046FE942F618EDF00F65741 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 2046FE932F618EDF00F65741 /* FirebaseMessaging */; };
@@ -23,16 +24,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				"InstagramClone-UIKit.xcdatamodeld",
 			);
 			target = 2046FE602F618C6400F65741 /* InstagramClone-UIKit */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		201FE99B2F698E2E004E9A56 /* Exceptions for "InstagramClone-UIKit" folder in "Copy Bundle Resources" phase from "InstagramClone-UIKit" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 2046FE5F2F618C6400F65741 /* Resources */;
+			membershipExceptions = (
+				"InstagramClone-UIKit.xcdatamodeld",
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2046FE632F618C6400F65741 /* InstagramClone-UIKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				2046FE762F618C6500F65741 /* Exceptions for "InstagramClone-UIKit" folder in "InstagramClone-UIKit" target */,
+				201FE99B2F698E2E004E9A56 /* Exceptions for "InstagramClone-UIKit" folder in "Copy Bundle Resources" phase from "InstagramClone-UIKit" target */,
 			);
 			path = "InstagramClone-UIKit";
 			sourceTree = "<group>";
@@ -49,6 +62,7 @@
 				2046FE902F618EDF00F65741 /* FirebaseAuth in Frameworks */,
 				2046FE922F618EDF00F65741 /* FirebaseFirestore in Frameworks */,
 				201FE98C2F68253E004E9A56 /* Kingfisher in Frameworks */,
+				201FE9972F697CE7004E9A56 /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +110,7 @@
 				2046FE932F618EDF00F65741 /* FirebaseMessaging */,
 				2046FE952F618EDF00F65741 /* FirebaseStorage */,
 				201FE98B2F68253E004E9A56 /* Kingfisher */,
+				201FE9962F697CE7004E9A56 /* IQKeyboardManagerSwift */,
 			);
 			productName = "InstagramClone-UIKit";
 			productReference = 2046FE612F618C6400F65741 /* InstagramClone-UIKit.app */;
@@ -128,6 +143,7 @@
 			packageReferences = (
 				2046FE8E2F618EDF00F65741 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				201FE98A2F68253E004E9A56 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				201FE9952F697CE7004E9A56 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2046FE622F618C6400F65741 /* Products */;
@@ -373,6 +389,14 @@
 				minimumVersion = 8.8.0;
 			};
 		};
+		201FE9952F697CE7004E9A56 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.2;
+			};
+		};
 		2046FE8E2F618EDF00F65741 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -388,6 +412,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 201FE98A2F68253E004E9A56 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		201FE9962F697CE7004E9A56 /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 201FE9952F697CE7004E9A56 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
 		};
 		2046FE8F2F618EDF00F65741 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

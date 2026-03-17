@@ -204,6 +204,8 @@ class SoundMessageCell: UICollectionViewCell {
             timeLabelLeadingConstraint = timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor)
             timeLabelLeadingConstraint?.isActive = true
         }
+        
+        bubbleView.layer.mask = CAShapeLayer()
     }
     
     func updatePlayState(isPlaying: Bool, currentTime: Double, isDownloading: Bool) {
