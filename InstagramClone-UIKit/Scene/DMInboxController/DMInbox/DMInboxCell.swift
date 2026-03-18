@@ -130,13 +130,13 @@ class DMInboxCell: UITableViewCell {
         unreadDot.isHidden = message.isSeen
         
         if message.isSeen {
-            usernameLabel.font = .systemFont(ofSize: 14, weight: .bold)
-            lastMessageLabel.font = .systemFont(ofSize: 13, weight: .semibold)
-            lastMessageLabel.textColor = UIColor(resource: .igText)
-        } else {
             usernameLabel.font = .systemFont(ofSize: 14, weight: .semibold)
             lastMessageLabel.font = .systemFont(ofSize: 13)
             lastMessageLabel.textColor = UIColor(resource: .igPlaceHolder)
+        } else {
+            usernameLabel.font = .systemFont(ofSize: 14, weight: .bold)
+            lastMessageLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+            lastMessageLabel.textColor = UIColor(resource: .igText)
         }
     }
 }

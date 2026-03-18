@@ -8,6 +8,8 @@
 import Foundation
 
 protocol InboxRepository {
+    
     func fetchRecentMessages(completion: @escaping ([RecentMessages]) -> Void)
+    
+    func fetchCurrentUser(completion: @escaping (User?) -> Void)
 }
-//salam

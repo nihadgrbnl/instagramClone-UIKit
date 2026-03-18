@@ -17,9 +17,10 @@ class ChatViewModel {
     
     var onDataUpdated: (() -> Void)?
     var onUserLoaded: (() -> Void)?
+    var onAudioStateChanged: ((AudioState) -> Void)?
     
     private let repository: ChatRepository
-    private let localRepostiory: MessageLocalDataSource
+    private let localRepository: MessageLocalDataSource
     
     var currentID: String {
         return repository.currentUserID
@@ -28,7 +29,7 @@ class ChatViewModel {
     init(repository: ChatRepository = FirebaseRepository(),
          localRepository: MessageLocalDataSource = MessageLocalRepository()) {
         self.repository = repository
-        self.localRepostiory = localRepository
+        self.localRepository = localRepository
     }
     
     func fetchUsers(otherUserID: String) {
@@ -54,7 +55,7 @@ class ChatViewModel {
         repository.listenForMessages(chatID: chatID) { [weak self] in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                let fetched = self.localRepostiory.fetch(chatID: chatID)
+                let fetched = self.localRepository.fetch(chatID: chatID)
                 print("Mesaj sayisi: \(fetched.count)")
                 self.messages = fetched
                 self.onDataUpdated?()
@@ -99,6 +100,41 @@ class ChatViewModel {
                                          chatUser: chatUser) { _, _ in }
         }
     }
+    
+    func setupAudioManager() {
+        AudioManager.shared.onStateChanged = { [weak self] state in
+            self?.onAudioStateChanged?(state)
+        }
+    }
+    
+    func handlePlayTapped(messageID: String, audioURL: String) {
+        AudioDownloadManager.shared.downloadAudio(urlString: audioURL) { url in
+            guard let url = url else {
+                print("HATA: İndirme başarısız, yükleniyor ikonu durduruluyor.")
+                // Arayüze sahte bir "durdu" sinyali gönderip yükleme ikonunu kapatıyoruz:
+                let failedState = AudioState(messageId: messageID, isPlaying: false, currentTime: 0, duration: 0)
+                AudioManager.shared.onStateChanged?(failedState)
+                return
+            }
+            AudioManager.shared.play(id: messageID, url: url)
+        }
+    }
+    
+    func stopAudio() {
+        AudioManager.shared.stop()
+    }
+    
+    func toggleRecording(permissionGranted: Bool) -> Bool {
+        guard permissionGranted else { return false }
+        if AudioRecorderManager.shared.isRecording {
+            guard let result = AudioRecorderManager.shared.stopRecording() else { return false }
+            sendVoiceMessages(localAudioURL: result.url, duration: result.duration)
+            return false
+        } else {
+            return AudioRecorderManager.shared.startRecording()
+        }
+    }
+    
     
     func sendVoiceMessages(localAudioURL: URL, duration: Double) {
         guard let currentUser = currentUser,

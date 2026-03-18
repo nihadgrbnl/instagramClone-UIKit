@@ -222,13 +222,13 @@ class LoginViewController: BaseController {
     }
     
     override func configureViewModel() {
-        viewModel.onLoginSuccess = {
+        viewModel.onLoginSuccess = { [weak self] in
             DispatchQueue.main.async {
-                self.coordinator?.didLogin()
+                self?.coordinator?.didLogin()
             }
         }
         
-        viewModel.onLoginError = { errorMessage in
+        viewModel.onLoginError = { [weak self] errorMessage in
             DispatchQueue.main.async {
                 print(errorMessage)
             }

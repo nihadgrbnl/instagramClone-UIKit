@@ -12,5 +12,5 @@ protocol AuthRepository {
     
     func logout()
     
-    func register(email: String, username: String, password: String, completion: @escaping (Bool, Error?) -> Void)
+    func register(email: String, fullName: String, username: String, password: String, completion: @escaping (Bool, Error?) -> Void)
 }

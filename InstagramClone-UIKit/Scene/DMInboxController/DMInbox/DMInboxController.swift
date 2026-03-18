@@ -21,6 +21,13 @@ class DMInboxController: BaseController {
         return t
     }()
     
+    private lazy var navTitleLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 16, weight: .semibold)
+        l.textColor = UIColor(resource: .igText)
+        return l
+    }()
+    
     private lazy var messageHeaderLabel: UILabel = {
         let l = UILabel()
         l.text = "Messages"
@@ -71,11 +78,7 @@ class DMInboxController: BaseController {
     }
     
     private func configureNavigationBar() {
-        let titleLabel = UILabel()
-        titleLabel.text = "nihadgrbnl"
-        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        titleLabel.textColor = UIColor(resource: .igText)
-        navigationItem.titleView = titleLabel
+        navigationItem.titleView = navTitleLabel
         
         let composeButton = UIBarButtonItem(
             image: UIImage(systemName: "square.and.pencil"),
@@ -97,7 +100,13 @@ class DMInboxController: BaseController {
         viewModel.onDataUpdated = { [weak self] in
             self?.tableView.reloadData()
         }
+        
+        viewModel.onCurrentUserLoaded = { [weak self] user in
+            self?.navTitleLabel.text = user.name
+            
+        }
         viewModel.fetchRecentMessages()
+        viewModel.fetchCurrentUser()
     }
 }
 

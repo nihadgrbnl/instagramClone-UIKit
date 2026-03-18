@@ -12,6 +12,9 @@ class DMInboxViewModel {
     var recentMessages = [RecentMessages]()
     var onDataUpdated: (() -> Void)?
     
+    var currentUser: User?
+    var onCurrentUserLoaded: ((User) -> Void)?
+    
     private let repository: InboxRepository
     
     init(repository: InboxRepository = FirebaseInboxRepository()) {
@@ -24,6 +27,16 @@ class DMInboxViewModel {
             print("Gelen mesaj sayısı: \(messages.count)")
             self.recentMessages = messages
             self.onDataUpdated?()
+        }
+    }
+    
+    func fetchCurrentUser() {
+        repository.fetchCurrentUser { [weak self] user in
+            guard let user = user else { return }
+            DispatchQueue.main.async {
+                self?.currentUser = user
+                self?.onCurrentUserLoaded?(user)
+            }
         }
     }
 }

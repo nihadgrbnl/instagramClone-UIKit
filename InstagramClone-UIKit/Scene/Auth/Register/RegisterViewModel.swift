@@ -25,6 +25,7 @@ class RegisterViewModel {
     
     func register() {
         repository.register(email: email,
+                            fullName: fullName,
                             username: username,
                             password: password) { success, error in
             if let error {

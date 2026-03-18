@@ -258,13 +258,13 @@ class RegisterViewController: BaseController {
     }
     
     override func configureViewModel() {
-        viewModel.onRegisterSuccess = {
+        viewModel.onRegisterSuccess = { [weak self] in
             DispatchQueue.main.async {
-                self.coordinator?.didRegister(email: self.viewModel.email)
+                self?.coordinator?.didRegister(email: self?.viewModel.email ?? "")
             }
         }
         
-        viewModel.onRegisterError = { errorMessage in
+        viewModel.onRegisterError = { [weak self] errorMessage in
             DispatchQueue.main.async {
                 print(errorMessage)
             }

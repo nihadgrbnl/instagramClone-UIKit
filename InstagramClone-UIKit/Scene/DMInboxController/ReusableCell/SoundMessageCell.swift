@@ -43,6 +43,7 @@ class SoundMessageCell: UICollectionViewCell {
         s.minimumValue = 0
         s.translatesAutoresizingMaskIntoConstraints = false
         s.addTarget(self, action: #selector(sliderChanged), for: .valueChanged)
+        s.addTarget(self, action: #selector(sliderTouchUp), for: [.touchUpInside, .touchUpOutside])
         return s
     }()
     
@@ -87,6 +88,7 @@ class SoundMessageCell: UICollectionViewCell {
     
     var onPlayTapped: (() -> Void)?
     var onSliderValueChanged: ((Double) -> Void)?
+    var onSliderEnded: ((Double) -> Void)?
     
     private var bubbleLeadingConstraint: NSLayoutConstraint!
     private var bubbleTrailingConstraint: NSLayoutConstraint!
@@ -115,7 +117,11 @@ class SoundMessageCell: UICollectionViewCell {
         bubbleView.addSubview(separatorLabel)
         bubbleView.addSubview(durationLabel)
         
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
+            contentView.widthAnchor.constraint(equalTo: widthAnchor),
+            
             avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             avatarImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             avatarImageView.widthAnchor.constraint(equalToConstant: 32),
@@ -153,13 +159,6 @@ class SoundMessageCell: UICollectionViewCell {
         
         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 8)
         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if bubbleView.layer.mask != nil {
-            applyBubbleShape()
-        }
     }
     
     func configure(message: Message, isCurrentUser: Bool, duration: Double) {
@@ -204,8 +203,7 @@ class SoundMessageCell: UICollectionViewCell {
             timeLabelLeadingConstraint = timeLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor)
             timeLabelLeadingConstraint?.isActive = true
         }
-        
-        bubbleView.layer.mask = CAShapeLayer()
+        applyBubbleShape()
     }
     
     func updatePlayState(isPlaying: Bool, currentTime: Double, isDownloading: Bool) {
@@ -224,19 +222,11 @@ class SoundMessageCell: UICollectionViewCell {
     }
     
     private func applyBubbleShape() {
-        guard bubbleView.bounds != .zero else { return }
-        let corners: UIRectCorner = isCurrentUser
-        ? [.topLeft, .topRight, .bottomLeft]
-        : [.topLeft, .topRight, .bottomRight]
-        
-        let path = UIBezierPath(
-            roundedRect: bubbleView.bounds,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: 16, height: 16)
-        )
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        bubbleView.layer.mask = mask
+        bubbleView.layer.cornerRadius = 16
+        bubbleView.clipsToBounds = true
+        bubbleView.layer.maskedCorners = isCurrentUser
+        ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner]
+        : [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner]
     }
     
     private func formatTime(_ seconds: Double) -> String {
@@ -250,6 +240,10 @@ class SoundMessageCell: UICollectionViewCell {
     
     @objc private func sliderChanged() {
         onSliderValueChanged?(Double(slider.value))
+    }
+    
+    @objc private func sliderTouchUp() {
+        onSliderEnded?(Double(slider.value))
     }
     
     override func prepareForReuse() {

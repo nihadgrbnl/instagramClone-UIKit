@@ -42,6 +42,7 @@ class AppCoordinator: Coordinator {
     
     private func showMainFlow() {
         let mainCoordinator = MainCoordinator()
+        mainCoordinator.parentCoordinator = self
         childCoordinators.append(mainCoordinator)
         mainCoordinator.start()
         

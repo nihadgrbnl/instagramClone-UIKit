@@ -13,6 +13,7 @@ class MainCoordinator: Coordinator {
     var navigationController: UINavigationController
     var childCoordinators: [Coordinator] = []
     var tabBarController: MainTabBarController
+    weak var parentCoordinator: AppCoordinator?
     
     private var feedNav: UINavigationController?
     private var searchNav: UINavigationController?
@@ -68,6 +69,9 @@ class MainCoordinator: Coordinator {
     }
     
     func didLogOut() {
-        
+        let repo = FirebaseAuthRepository()
+        repo.logout()
+        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        parentCoordinator?.didLogOut()
     }
 }

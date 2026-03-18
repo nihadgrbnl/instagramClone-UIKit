@@ -112,11 +112,25 @@ class ChatInputView: UIView {
         self.sendBtn.isHidden  = !hasText
         self.micBtn.isHidden = hasText
         self.galleryBtn.isHidden = hasText
-        
-        UIView.animate(withDuration: 0.2) {
-            self.sendBtn.alpha = hasText ? 1 : 0
-            self.micBtn.alpha = hasText ? 0 : 1
-            self.galleryBtn.alpha = hasText ? 0 : 1
+    }
+    
+    func updateRecordingState(isRecording: Bool) {
+        if isRecording {
+            micBtn.setImage(UIImage(systemName: "stop.circle.fill"), for: .normal)
+            micBtn.tintColor = .red
+            messageTextField.attributedPlaceholder = NSAttributedString(
+                string: "Recording...",
+                attributes: [.foregroundColor: UIColor.red]
+            )
+            messageTextField.isEnabled = false
+        } else {
+            micBtn.setImage(UIImage(systemName: "mic"), for: .normal)
+            micBtn.tintColor = UIColor(resource: .igText)
+            messageTextField.attributedPlaceholder = NSAttributedString(
+                string: "Message...",
+                attributes: [.foregroundColor: UIColor(resource: .igPlaceHolder)]
+            )
+            messageTextField.isEnabled = true
         }
     }
     

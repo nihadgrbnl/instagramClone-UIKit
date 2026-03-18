@@ -86,22 +86,45 @@ class ChatViewController: BaseController {
         viewModel.onDataUpdated = { [weak self] in
             self?.collection.reloadData()
             self?.scrollToBottom()
+            self?.viewModel.markAsRead()
         }
         
         viewModel.onUserLoaded = { [weak self] in
             self?.updateNavigationTitle()
+            self?.viewModel.markAsRead()
         }
         
         self.messageInputView.onSendMessage = { [weak self] text in
             self?.viewModel.sendMessage(type: .text, content: text)
         }
         
-        self.messageInputView.onMicTapped = { [weak self] in
+        viewModel.setupAudioManager()
+        viewModel.onAudioStateChanged = { [weak self] state in
+            guard let self = self,
+                  let messageID = state.messageId else { return }
             
+            guard let index = self.viewModel.messages.firstIndex(where: { $0.id == messageID }) else { return }
+            let indexPath = IndexPath(item: index, section: 0)
+            
+            guard let cell = self.collection.cellForItem(at: indexPath) as? SoundMessageCell else { return }
+            cell.updatePlayState(
+                isPlaying: state.isPlaying,
+                currentTime: state.currentTime,
+                isDownloading: false
+            )
+        }
+        
+        self.messageInputView.onMicTapped = { [weak self] in
+            AudioRecorderManager.shared.requestPermission { granted in
+                DispatchQueue.main.async {
+                    let isRecording = self?.viewModel.toggleRecording(permissionGranted: granted) ?? false
+                    self?.messageInputView.updateRecordingState(isRecording: isRecording)
+                }
+            }
         }
         
         self.messageInputView.onGalleryTapped = { [weak self] in
-    
+            
         }
     }
     
@@ -179,12 +202,34 @@ extension ChatViewController: UICollectionViewDelegate, UICollectionViewDataSour
         case .voice:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SoundMessageCell.identifier, for: indexPath) as! SoundMessageCell
             cell.configure(message: message, isCurrentUser: isCurrentUser, duration: message.duration ?? 0)
-            cell.onPlayTapped = { [weak self] in
+            
+            let isThisMessagePlaying = (AudioManager.shared.currentMessageId == message.id) && AudioManager.shared.isPlaying
+            let currentAudioTime = (AudioManager.shared.currentMessageId == message.id) ? AudioManager.shared.currentTime : 0
+            
+            cell.updatePlayState(isPlaying: isThisMessagePlaying, currentTime: currentAudioTime, isDownloading: false)
+            
+            cell.onPlayTapped = { [weak self, weak cell] in
+                guard let id = message.id else {
+                    print("DEBUG: message.id nil!")
+                    return
+                }
+                print("DEBUG: play tapped — id: \(id), url: \(message.content)")
                 
+                // 2. ÇÖZÜM: TIKLANDIĞI ANDA YÜKLENİYOR İKONUNU ÇIKAR
+                cell?.updatePlayState(isPlaying: false, currentTime: currentAudioTime, isDownloading: true)
+                
+                self?.viewModel.handlePlayTapped(messageID: id, audioURL: message.content)
             }
+            
             cell.onSliderValueChanged = { value in
+                AudioManager.shared.isScrubbing = true
+            }
+            
+            cell.onSliderEnded = { value in
+                AudioManager.shared.isScrubbing = false
                 AudioManager.shared.seek(to: value)
             }
+            
             return cell
         }
     }

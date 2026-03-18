@@ -30,4 +30,15 @@ class FirebaseInboxRepository: InboxRepository {
                 }
             }
     }
+    
+    func fetchCurrentUser(completion: @escaping (User?) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(nil)
+            return
+        }
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            let user = try? snapshot?.data(as: User.self)
+            completion(user)
+        }
+    }
 }

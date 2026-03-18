@@ -31,7 +31,7 @@ class FirebaseAuthRepository: AuthRepository {
         }
     }
     
-    func register(email: String, username: String, password: String, completion: @escaping (Bool, (any Error)?) -> Void) {
+    func register(email: String, fullName: String, username: String, password: String, completion: @escaping (Bool, (any Error)?) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error {
                 print(error.localizedDescription)
@@ -41,6 +41,7 @@ class FirebaseAuthRepository: AuthRepository {
                 Firestore.firestore().collection("users").document(uid).setData([
                     "uid": uid,
                     "username": username,
+                    "fullname": fullName,
                     "email": email
                 ])
                 { error in
