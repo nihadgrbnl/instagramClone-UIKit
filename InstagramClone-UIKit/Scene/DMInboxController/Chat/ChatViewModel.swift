@@ -109,7 +109,7 @@ class ChatViewModel {
     
     func handlePlayTapped(messageID: String, audioURL: String) {
         if AudioManager.shared.currentMessageId == messageID {
-            AudioManager.shared.play(id: messageID, url: URL(fileURLWithPath: ""))
+            AudioManager.shared.toggle()
             return
         }
         

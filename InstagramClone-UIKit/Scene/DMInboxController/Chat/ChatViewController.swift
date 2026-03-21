@@ -232,27 +232,13 @@ extension ChatViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 isDownloading: false
             )
             
-            cell.onPlayTapped = { [weak self, weak cell] in
+            cell.onPlayTapped = { [weak self] in
                 guard let id = message.id else { return }
-                
-                let liveTime = (AudioManager.shared.currentMessageId == id) ? AudioManager.shared.currentTime : 0
-                cell?.updatePlayState(isPlaying: false, currentTime: liveTime, isDownloading: true)
-                
                 self?.viewModel.handlePlayTapped(messageID: id, audioURL: message.content)
             }
-            
-            cell.onSliderTouchDown = {
-                AudioManager.shared.isScrubbing = true
-            }
-            
-            cell.onSliderValueChanged = { value in
-            }
-            
-            cell.onSliderEnded = { value in
-                AudioManager.shared.isScrubbing = false
+            cell.onSeekCompleted = { value in
                 AudioManager.shared.seek(to: value)
             }
-            
             return cell
         }
     }

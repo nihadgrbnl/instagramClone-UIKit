@@ -88,9 +88,7 @@ class SoundMessageCell: UICollectionViewCell {
     }()
     
     var onPlayTapped: (() -> Void)?
-    var onSliderValueChanged: ((Double) -> Void)?
-    var onSliderEnded: ((Double) -> Void)?
-    var onSliderTouchDown: (() -> Void)?
+    var onSeekCompleted: ((Double) -> Void)?
     
     private var bubbleLeadingConstraint: NSLayoutConstraint!
     private var bubbleTrailingConstraint: NSLayoutConstraint!
@@ -98,6 +96,7 @@ class SoundMessageCell: UICollectionViewCell {
     private var timeLabelTrailingConstraint: NSLayoutConstraint?
     
     private var isCurrentUser: Bool = false
+    private var isScrubbing = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -207,23 +206,24 @@ class SoundMessageCell: UICollectionViewCell {
     }
     
     func updatePlayState(isPlaying: Bool, currentTime: Double, duration: Double? = nil, isDownloading: Bool) {
-        
         if let duration = duration, duration > 0 {
             slider.maximumValue = Float(duration)
             durationLabel.text = formatTime(duration)
         }
         
         if isDownloading {
-                loadingIndicator.startAnimating()
-                playPauseBtn.isHidden = true
-            } else {
-                loadingIndicator.stopAnimating()
-                playPauseBtn.isHidden = false
-                playPauseBtn.setImage(UIImage(systemName: isPlaying ? "pause.fill" : "play.fill"), for: .normal)
-            }
+            loadingIndicator.startAnimating()
+            playPauseBtn.isHidden = true
+        } else {
+            loadingIndicator.stopAnimating()
+            playPauseBtn.isHidden = false
+            playPauseBtn.setImage(UIImage(systemName: isPlaying ? "pause.fill" : "play.fill"), for: .normal)
+        }
         
-        slider.value = Float(currentTime)
-        currentTimeLabel.text = formatTime(currentTime)
+        if !isScrubbing {
+            slider.value = Float(currentTime)
+            currentTimeLabel.text = formatTime(currentTime)
+        }
     }
     
     private func applyBubbleShape() {
@@ -240,7 +240,7 @@ class SoundMessageCell: UICollectionViewCell {
     }
     
     @objc private func sliderTouchDown() {
-        onSliderTouchDown?()
+        isScrubbing = true
     }
     
     @objc private func playPauseTapped() {
@@ -248,11 +248,12 @@ class SoundMessageCell: UICollectionViewCell {
     }
     
     @objc private func sliderChanged() {
-        onSliderValueChanged?(Double(slider.value))
+        currentTimeLabel.text = formatTime(Double(slider.value))
     }
     
     @objc private func sliderTouchUp() {
-        onSliderEnded?(Double(slider.value))
+        isScrubbing = false
+        onSeekCompleted?(Double(slider.value))
     }
     
     override func prepareForReuse() {
@@ -270,8 +271,7 @@ class SoundMessageCell: UICollectionViewCell {
         slider.value = 0
         slider.maximumValue = 1.0
         onPlayTapped = nil
-        onSliderValueChanged = nil
-        onSliderEnded = nil
-        onSliderTouchDown = nil
+        onSeekCompleted = nil
+        isScrubbing = false
     }
 }

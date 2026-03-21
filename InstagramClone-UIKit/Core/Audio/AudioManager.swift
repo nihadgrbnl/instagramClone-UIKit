@@ -25,9 +25,7 @@ final class AudioManager: NSObject {
     private(set) var isPlaying: Bool = false
     private(set) var currentTime: TimeInterval = 0
     private(set) var duration: TimeInterval = 0
-    
-    var isScrubbing: Bool = false
-    
+        
     var onStateChanged: ((AudioState) -> Void)?
     
     private override init() {
@@ -163,7 +161,7 @@ final class AudioManager: NSObject {
     
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self = self, !self.isScrubbing else { return }
+            guard let self = self else { return }
             self.currentTime = self.audioPlayer?.currentTime ?? 0
             self.notifyState()
         }
@@ -182,6 +180,11 @@ final class AudioManager: NSObject {
             duration: duration
         )
         onStateChanged?(state)
+    }
+    
+    func toggle() {
+        guard let id = currentMessageId else { return }
+        toggleCurrentAudio(id: id)
     }
     
     deinit {
