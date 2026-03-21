@@ -84,9 +84,19 @@ class ChatViewController: BaseController {
     
     override func configureViewModel() {
         viewModel.onDataUpdated = { [weak self] in
-            self?.collection.reloadData()
-            self?.scrollToBottom()
-            self?.viewModel.markAsRead()
+            guard let self = self else { return }
+            let oldCount = self.collection.numberOfItems(inSection: 0)
+            let newCount = self.viewModel.messages.count
+            
+            if newCount > oldCount {
+                let indexPaths = (oldCount..<newCount).map { IndexPath(item: $0, section: 0) }
+                self.collection.insertItems(at: indexPaths)
+                self.scrollToBottom()
+            } else {
+                self.collection.reloadData()
+                self.scrollToBottom()
+            }
+            self.viewModel.markAsRead()
         }
         
         viewModel.onUserLoaded = { [weak self] in
@@ -99,6 +109,7 @@ class ChatViewController: BaseController {
         }
         
         viewModel.setupAudioManager()
+        
         viewModel.onAudioStateChanged = { [weak self] state in
             guard let self = self,
                   let messageID = state.messageId else { return }
@@ -110,6 +121,7 @@ class ChatViewController: BaseController {
             cell.updatePlayState(
                 isPlaying: state.isPlaying,
                 currentTime: state.currentTime,
+                duration: state.duration,
                 isDownloading: false
             )
         }
@@ -171,7 +183,7 @@ class ChatViewController: BaseController {
     }
     
     @objc private func backTapped() {
-        navigationController?.popViewController(animated: true)
+        coordinator?.goBack()
     }
 }
 
@@ -186,43 +198,54 @@ extension ChatViewController: UICollectionViewDelegate, UICollectionViewDataSour
         let isCurrentUser = message.senderID == viewModel.currentID
         
         switch message.type {
+            
         case .text:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TextMessageCell.identifier, for: indexPath) as! TextMessageCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TextMessageCell.identifier, for: indexPath) as? TextMessageCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(message: message, isCurrentUser: isCurrentUser)
             return cell
             
         case .image:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageMessageCell.identifier, for: indexPath) as! ImageMessageCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageMessageCell.identifier, for: indexPath) as? ImageMessageCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(message: message, isCurrentUser: isCurrentUser)
             cell.onImageTapped = { [weak self] in
-                
+                //
             }
             return cell
             
         case .voice:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SoundMessageCell.identifier, for: indexPath) as! SoundMessageCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SoundMessageCell.identifier, for: indexPath) as? SoundMessageCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(message: message, isCurrentUser: isCurrentUser, duration: message.duration ?? 0)
             
             let isThisMessagePlaying = (AudioManager.shared.currentMessageId == message.id) && AudioManager.shared.isPlaying
             let currentAudioTime = (AudioManager.shared.currentMessageId == message.id) ? AudioManager.shared.currentTime : 0
             
-            cell.updatePlayState(isPlaying: isThisMessagePlaying, currentTime: currentAudioTime, isDownloading: false)
+            cell.updatePlayState(
+                isPlaying: isThisMessagePlaying,
+                currentTime: currentAudioTime,
+                duration: nil,
+                isDownloading: false
+            )
             
             cell.onPlayTapped = { [weak self, weak cell] in
-                guard let id = message.id else {
-                    print("DEBUG: message.id nil!")
-                    return
-                }
-                print("DEBUG: play tapped — id: \(id), url: \(message.content)")
+                guard let id = message.id else { return }
                 
-                // 2. ÇÖZÜM: TIKLANDIĞI ANDA YÜKLENİYOR İKONUNU ÇIKAR
-                cell?.updatePlayState(isPlaying: false, currentTime: currentAudioTime, isDownloading: true)
+                let liveTime = (AudioManager.shared.currentMessageId == id) ? AudioManager.shared.currentTime : 0
+                cell?.updatePlayState(isPlaying: false, currentTime: liveTime, isDownloading: true)
                 
                 self?.viewModel.handlePlayTapped(messageID: id, audioURL: message.content)
             }
             
-            cell.onSliderValueChanged = { value in
+            cell.onSliderTouchDown = {
                 AudioManager.shared.isScrubbing = true
+            }
+            
+            cell.onSliderValueChanged = { value in
             }
             
             cell.onSliderEnded = { value in

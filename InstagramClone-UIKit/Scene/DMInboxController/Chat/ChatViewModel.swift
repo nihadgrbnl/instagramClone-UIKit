@@ -108,10 +108,13 @@ class ChatViewModel {
     }
     
     func handlePlayTapped(messageID: String, audioURL: String) {
+        if AudioManager.shared.currentMessageId == messageID {
+            AudioManager.shared.play(id: messageID, url: URL(fileURLWithPath: ""))
+            return
+        }
+        
         AudioDownloadManager.shared.downloadAudio(urlString: audioURL) { url in
             guard let url = url else {
-                print("HATA: İndirme başarısız, yükleniyor ikonu durduruluyor.")
-                // Arayüze sahte bir "durdu" sinyali gönderip yükleme ikonunu kapatıyoruz:
                 let failedState = AudioState(messageId: messageID, isPlaying: false, currentTime: 0, duration: 0)
                 AudioManager.shared.onStateChanged?(failedState)
                 return

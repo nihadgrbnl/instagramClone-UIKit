@@ -287,6 +287,6 @@ class RegisterViewController: BaseController {
     }
     
     @objc private func loginTapped() {
-        navigationController?.popViewController(animated: true)
+        coordinator?.goBack()
     }
 }

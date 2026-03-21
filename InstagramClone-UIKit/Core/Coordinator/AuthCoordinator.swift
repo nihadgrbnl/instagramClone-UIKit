@@ -40,4 +40,8 @@ class AuthCoordinator: Coordinator {
             loginController.prefillEmail(email: email)
         }
     }
+    
+    func goBack() {
+        navigationController.popViewController(animated: true)
+    }
 }

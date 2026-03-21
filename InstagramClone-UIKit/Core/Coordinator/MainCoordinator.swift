@@ -74,4 +74,8 @@ class MainCoordinator: Coordinator {
         UserDefaults.standard.set(false, forKey: "isLoggedIn")
         parentCoordinator?.didLogOut()
     }
+    
+    func goBack() {
+        dmNav?.popViewController(animated: true)
+    }
 }

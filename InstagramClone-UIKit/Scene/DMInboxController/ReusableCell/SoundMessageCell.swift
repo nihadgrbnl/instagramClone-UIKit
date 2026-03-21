@@ -42,8 +42,9 @@ class SoundMessageCell: UICollectionViewCell {
         let s = UISlider()
         s.minimumValue = 0
         s.translatesAutoresizingMaskIntoConstraints = false
+        s.addTarget(self, action: #selector(sliderTouchDown), for: .touchDown)
         s.addTarget(self, action: #selector(sliderChanged), for: .valueChanged)
-        s.addTarget(self, action: #selector(sliderTouchUp), for: [.touchUpInside, .touchUpOutside])
+        s.addTarget(self, action: #selector(sliderTouchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
         return s
     }()
     
@@ -89,6 +90,7 @@ class SoundMessageCell: UICollectionViewCell {
     var onPlayTapped: (() -> Void)?
     var onSliderValueChanged: ((Double) -> Void)?
     var onSliderEnded: ((Double) -> Void)?
+    var onSliderTouchDown: (() -> Void)?
     
     private var bubbleLeadingConstraint: NSLayoutConstraint!
     private var bubbleTrailingConstraint: NSLayoutConstraint!
@@ -117,10 +119,8 @@ class SoundMessageCell: UICollectionViewCell {
         bubbleView.addSubview(separatorLabel)
         bubbleView.addSubview(durationLabel)
         
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            contentView.widthAnchor.constraint(equalTo: widthAnchor),
+            contentView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width),
             
             avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             avatarImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
@@ -132,7 +132,7 @@ class SoundMessageCell: UICollectionViewCell {
             bubbleView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.65),
             
             playPauseBtn.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
-            playPauseBtn.centerYAnchor.constraint(equalTo: bubbleView.centerYAnchor),
+            playPauseBtn.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
             playPauseBtn.widthAnchor.constraint(equalToConstant: 28),
             playPauseBtn.heightAnchor.constraint(equalToConstant: 28),
             
@@ -206,16 +206,21 @@ class SoundMessageCell: UICollectionViewCell {
         applyBubbleShape()
     }
     
-    func updatePlayState(isPlaying: Bool, currentTime: Double, isDownloading: Bool) {
-        if isDownloading {
-            loadingIndicator.startAnimating()
-            playPauseBtn.isHidden = true
-        } else {
-            loadingIndicator.stopAnimating()
-            playPauseBtn.isHidden = false
-            let imageName = isPlaying ? "pause.fill" : "play.fill"
-            playPauseBtn.setImage(UIImage(systemName: imageName), for: .normal)
+    func updatePlayState(isPlaying: Bool, currentTime: Double, duration: Double? = nil, isDownloading: Bool) {
+        
+        if let duration = duration, duration > 0 {
+            slider.maximumValue = Float(duration)
+            durationLabel.text = formatTime(duration)
         }
+        
+        if isDownloading {
+                loadingIndicator.startAnimating()
+                playPauseBtn.isHidden = true
+            } else {
+                loadingIndicator.stopAnimating()
+                playPauseBtn.isHidden = false
+                playPauseBtn.setImage(UIImage(systemName: isPlaying ? "pause.fill" : "play.fill"), for: .normal)
+            }
         
         slider.value = Float(currentTime)
         currentTimeLabel.text = formatTime(currentTime)
@@ -234,6 +239,10 @@ class SoundMessageCell: UICollectionViewCell {
         return String(format: "%02d:%02d", total / 60, total % 60)
     }
     
+    @objc private func sliderTouchDown() {
+        onSliderTouchDown?()
+    }
+    
     @objc private func playPauseTapped() {
         onPlayTapped?()
     }
@@ -248,14 +257,21 @@ class SoundMessageCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        bubbleView.layer.mask = nil
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
-        slider.value = 0
         currentTimeLabel.text = "00:00"
         playPauseBtn.setImage(UIImage(systemName: "play.fill"), for: .normal)
         playPauseBtn.isHidden = false
         loadingIndicator.stopAnimating()
+        bubbleLeadingConstraint.isActive = false
+        bubbleTrailingConstraint.isActive = false
         timeLabelLeadingConstraint?.isActive = false
         timeLabelTrailingConstraint?.isActive = false
+        
+        slider.value = 0
+        slider.maximumValue = 1.0
+        onPlayTapped = nil
+        onSliderValueChanged = nil
+        onSliderEnded = nil
+        onSliderTouchDown = nil
     }
 }

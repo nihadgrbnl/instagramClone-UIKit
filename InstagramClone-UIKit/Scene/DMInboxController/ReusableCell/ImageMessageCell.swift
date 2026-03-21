@@ -84,6 +84,10 @@ class ImageMessageCell: UICollectionViewCell {
         messageImageView.addGestureRecognizer(tapGesture)
         
         NSLayoutConstraint.activate([
+            
+            contentView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width),
+
+            
             avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             avatarImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             avatarImageView.widthAnchor.constraint(equalToConstant: 32),
@@ -108,13 +112,6 @@ class ImageMessageCell: UICollectionViewCell {
         
         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 8)
         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if bubbleView.layer.mask != nil {
-            applyBubbleShape()
-        }
     }
     
     func configure(message: Message, isCurrentUser: Bool) {
@@ -147,24 +144,15 @@ class ImageMessageCell: UICollectionViewCell {
         messageImageView.setImage(urlString: message.content) { [weak self] _ in
             self?.loadingIndicator.stopAnimating()
         }
-        bubbleView.layer.mask = CAShapeLayer()
+        applyBubbleShape()
     }
     
     private func applyBubbleShape() {
-        
-        let corners: UIRectCorner = isCurrentUser
-        ? [.topLeft, .topRight, .bottomLeft]
-        : [.topLeft, .topRight, .bottomRight]
-        
-        let path = UIBezierPath(
-            roundedRect: bubbleView.bounds,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: 16, height: 16)
-        )
-        
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        bubbleView.layer.mask = mask
+        bubbleView.layer.cornerRadius = 16
+        bubbleView.clipsToBounds = true
+        bubbleView.layer.maskedCorners = isCurrentUser
+            ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner]
+            : [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner]
     }
     
     @objc private func imageTapped() {
@@ -174,7 +162,6 @@ class ImageMessageCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         messageImageView.image = nil
-        bubbleView.layer.mask = nil
         loadingIndicator.stopAnimating()
         avatarImageView.image = UIImage(systemName: "person.circle.fill")
         timeLabelLeadingConstraint?.isActive = false
