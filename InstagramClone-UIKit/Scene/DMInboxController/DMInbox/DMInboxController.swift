@@ -117,7 +117,9 @@ extension DMInboxController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: DMInboxCell.identifier, for: indexPath) as! DMInboxCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: DMInboxCell.identifier, for: indexPath) as? DMInboxCell else {
+            return UITableViewCell()
+        }
         cell.configure(message: viewModel.recentMessages[indexPath.row])
         return cell
     }

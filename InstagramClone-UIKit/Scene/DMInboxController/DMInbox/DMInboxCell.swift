@@ -43,6 +43,8 @@ class DMInboxCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12)
         label.textColor = UIColor(resource: .igPlaceHolder)
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -116,10 +118,11 @@ class DMInboxCell: UITableViewCell {
             
             lastMessageLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: 4),
             lastMessageLabel.leadingAnchor.constraint(equalTo: usernameLabel.leadingAnchor),
-            lastMessageLabel.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -8),
+            lastMessageLabel.trailingAnchor.constraint(lessThanOrEqualTo: timeLabel.leadingAnchor, constant: -8),
 
             timeLabel.centerYAnchor.constraint(equalTo: lastMessageLabel.centerYAnchor),
             timeLabel.leadingAnchor.constraint(equalTo: lastMessageLabel.trailingAnchor, constant: 8),
+            timeLabel.trailingAnchor.constraint(equalTo: unreadDot.leadingAnchor, constant: -12),
         ])
     }
     
@@ -128,6 +131,7 @@ class DMInboxCell: UITableViewCell {
         lastMessageLabel.text = message.text
         timeLabel.text = message.timeString
         unreadDot.isHidden = message.isSeen
+        avatarImageView.setImage(urlString: message.profileImageURL)
         
         if message.isSeen {
             usernameLabel.font = .systemFont(ofSize: 14, weight: .semibold)
@@ -138,5 +142,13 @@ class DMInboxCell: UITableViewCell {
             lastMessageLabel.font = .systemFont(ofSize: 13, weight: .semibold)
             lastMessageLabel.textColor = UIColor(resource: .igText)
         }
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        avatarImageView.image = UIImage(systemName: "person.circle.fill")
+        usernameLabel.text = nil
+        lastMessageLabel.text = nil
+        timeLabel.text = nil
     }
 }

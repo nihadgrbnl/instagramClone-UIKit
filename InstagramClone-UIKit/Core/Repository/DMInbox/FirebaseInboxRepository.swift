@@ -23,7 +23,7 @@ class FirebaseInboxRepository: InboxRepository {
                 
                 let recentMessages = documents.compactMap { document -> RecentMessages? in
                     guard document.documentID != currentUserID else { return nil }
-                    return try? document.data(as: RecentMessages.self)
+                    return FirebaseAdapter.toRecentMessage(document: document)
                 }
                 DispatchQueue.main.async {
                     completion(recentMessages)
@@ -37,7 +37,7 @@ class FirebaseInboxRepository: InboxRepository {
             return
         }
         db.collection("users").document(uid).getDocument { snapshot, error in
-            let user = try? snapshot?.data(as: User.self)
+            let user : User? = if let snapshot { FirebaseAdapter.toUser(document: snapshot) } else { nil }
             completion(user)
         }
     }

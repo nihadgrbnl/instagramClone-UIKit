@@ -34,7 +34,7 @@ class FirebaseRepository : ChatRepository {
         group.enter()
         db.collection("users").document(currentID).getDocument{ snapshot, _ in
             if let document = snapshot {
-                fetchedCurrentUser = try? document.data(as: User.self)
+                fetchedCurrentUser = FirebaseAdapter.toUser(document: document)
             }
             group.leave()
         }
@@ -42,7 +42,7 @@ class FirebaseRepository : ChatRepository {
         group.enter()
         db.collection("users").document(otherUserID).getDocument{ snapshot, _ in
             if let document = snapshot {
-                fetchedChatUser = try? document.data(as: User.self)
+                fetchedChatUser = FirebaseAdapter.toUser(document: document)
             }
             group.leave()
         }
@@ -76,21 +76,21 @@ class FirebaseRepository : ChatRepository {
                 return
             }
             
-                        
+            
             snapshot?.documentChanges.forEach { change in
                 if change.type == .added {
-                    if let message = try? change.document.data(as: Message.self) {
+                    if let message = FirebaseAdapter.toMessage(document: change.document) {
                         
                         print("☁️ FIREBASE: Yeni mesaj ağdan geldi -> Core Data'ya kaydediliyor...")
                         
                         //Get audio file from firebase storage
-//                        var audioFileFromFirebaseStorage = "AudioFileFirebaseStorage"
+                        //                        var audioFileFromFirebaseStorage = "AudioFileFirebaseStorage"
                         
                         //Elave funksiya, audio  yazirsan file storage (device)
-//                        var newPath = "newPath" //write function return newPath of audioFile
+                        //                        var newPath = "newPath" //write function return newPath of audioFile
                         
                         //Write to local database (id, filepath, audio)
-//                        var entity = "messageId, audioFileFromFirebaseStorage, newPath"
+                        //                        var entity = "messageId, audioFileFromFirebaseStorage, newPath"
                         
                         
                         self.localRepository.save(chatID: chatID, model: message)
