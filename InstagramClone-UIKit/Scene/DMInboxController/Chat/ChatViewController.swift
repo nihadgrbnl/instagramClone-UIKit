@@ -136,7 +136,10 @@ class ChatViewController: BaseController {
         }
         
         self.messageInputView.onGalleryTapped = { [weak self] in
-            
+            let picker = UIImagePickerController()
+            picker.delegate = self
+            picker.allowsEditing = true
+            self?.present(picker, animated: true)
         }
     }
     
@@ -241,5 +244,14 @@ extension ChatViewController: UICollectionViewDelegate, UICollectionViewDataSour
             }
             return cell
         }
+    }
+}
+
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let image = info[.editedImage] as? UIImage,
+              let imageData = image.jpegData(compressionQuality: 0.75) else { return }
+        viewModel.sendImageMessage(imageData: imageData)
+        dismiss(animated: true)
     }
 }

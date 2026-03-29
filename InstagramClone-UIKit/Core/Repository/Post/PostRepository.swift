@@ -8,7 +8,5 @@
 import Foundation
 
 protocol PostRepository {
-    func uploadPost () {
-        
-    }
+    func uploadPost(imageData: Data, caption: String, completion: @escaping (Result<Void, AppError>) -> Void)
 }
