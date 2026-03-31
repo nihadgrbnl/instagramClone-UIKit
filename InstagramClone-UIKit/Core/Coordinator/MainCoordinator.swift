@@ -45,7 +45,7 @@ class MainCoordinator: Coordinator {
 
         let profileController = ProfileController()
         profileNav = makeNav(root: profileController, title: "Profile", image: "person.circle", selectedImage: "person.circle.fill")
-//        profileController.coordinator = self
+        profileController.coordinator = self
 
         tabBarController.viewControllers = [feedNav, searchNav, uploadNav, dmNav, profileNav].compactMap{ $0 }
         tabBarController.coordinator = self

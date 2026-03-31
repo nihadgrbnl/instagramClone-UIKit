@@ -111,10 +111,19 @@ class UploadController: BaseController {
     private let viewModel = UploadViewModel()
     private var phAssets: [PHAsset] = []
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadPhotos()
+    }
+    
     override func configureUI() {
         title = "New Post"
         captionTextView.delegate = self
         configureNavigationBar()
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        galleryCollectionView.addGestureRecognizer(tap)
     }
     
     override func configureConstraints() {
@@ -217,6 +226,10 @@ class UploadController: BaseController {
         UIApplication.shared.open(url)
     }
     
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     private func resetForm() {
         thumbnailImageView.image = nil
         captionTextView.text = ""
@@ -242,7 +255,6 @@ class UploadController: BaseController {
     private func loadPhotos() {
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        fetchOptions.fetchLimit = 50
         
         let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
         var fetchedAssets: [PHAsset] = []
@@ -299,14 +311,17 @@ extension UploadController: UICollectionViewDataSource, UICollectionViewDelegate
         let asset = phAssets[indexPath.item]
         let size = CGSize(width: 150, height: 150)
         
-        PHImageManager.default().requestImage(
+        let requestID = PHImageManager.default().requestImage(
             for: asset,
             targetSize: size,
             contentMode: .aspectFill,
             options: nil
         ) { image, _ in
-            cell.configure(image: image)
+            DispatchQueue.main.async {
+                cell.configure(image: image)
+            }
         }
+        cell.tag = Int(requestID)
         
         return cell
     }
@@ -326,4 +341,13 @@ extension UploadController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         captionPlaceholderLabel.isHidden = !textView.text.isEmpty
     }
+
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            textView.resignFirstResponder()
+            return false
+        }
+        return true
+    }
 }
+

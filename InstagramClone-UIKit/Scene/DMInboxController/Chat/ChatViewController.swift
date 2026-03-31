@@ -97,11 +97,13 @@ class ChatViewController: BaseController {
                 self.scrollToBottom()
             }
             self.viewModel.markAsRead()
+            self.updateEmptyState()
         }
         
         viewModel.onUserLoaded = { [weak self] in
             self?.updateNavigationTitle()
             self?.viewModel.markAsRead()
+            self?.updateEmptyState()
         }
         
         self.messageInputView.onSendMessage = { [weak self] text in
@@ -140,6 +142,19 @@ class ChatViewController: BaseController {
             picker.delegate = self
             picker.allowsEditing = true
             self?.present(picker, animated: true)
+        }
+    }
+    
+    private func updateEmptyState() {
+        if viewModel.messages.isEmpty {
+            let label = UILabel()
+            label.text = "Say hi 👋"
+            label.font = .systemFont(ofSize: 15)
+            label.textColor = .tertiaryLabel
+            label.textAlignment = .center
+            collection.backgroundView = label
+        } else {
+            collection.backgroundView = nil
         }
     }
     

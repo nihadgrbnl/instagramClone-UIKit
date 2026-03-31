@@ -60,5 +60,10 @@ class PhotoGalleryCell: UICollectionViewCell {
     func configure(image: UIImage?) {
         imageView.image = image
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView.image = nil
+    }
 }
 
