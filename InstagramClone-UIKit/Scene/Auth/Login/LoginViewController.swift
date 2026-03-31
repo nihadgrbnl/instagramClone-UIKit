@@ -223,17 +223,26 @@ class LoginViewController: BaseController {
     
     override func configureViewModel() {
         viewModel.onLoginSuccess = { [weak self] in
-            DispatchQueue.main.async {
-                self?.coordinator?.didLogin()
-            }
+            self?.coordinator?.didLogin()
         }
         
         viewModel.onLoginError = { [weak self] errorMessage in
-            DispatchQueue.main.async {
-                print(errorMessage)
-            }
+            let alert = AlertBuilder()
+                .setTitle("Hata")
+                .setMessage(errorMessage)
+                .setPrimaryButton("Tamam")
+                .build()
+            self?.present(alert, animated: true)
+        }
+        
+        viewModel.onLoading = { [weak self] isLoading in
+            self?.loginBtn.isEnabled = !isLoading
+            self?.loginBtn.setTitle(isLoading ? "" : "Log In", for: .normal)
+            isLoading ? self?.loginBtn.setTitle("", for: .normal) : nil
+            self?.loginBtn.alpha = isLoading ? 0.7 : 1.0
         }
     }
+    
     
     func prefillEmail(email: String) {
         emailTextField.text = email
@@ -247,6 +256,7 @@ class LoginViewController: BaseController {
     }
     
     @objc private func loginTapped() {
+        view.endEditing(true)
         viewModel.login()
     }
     
@@ -257,7 +267,7 @@ class LoginViewController: BaseController {
     @objc private func emailChanged() {
         viewModel.email = emailTextField.text ?? ""
     }
-
+    
     @objc private func passwordChanged() {
         viewModel.password = passwordTextField.text ?? ""
     }

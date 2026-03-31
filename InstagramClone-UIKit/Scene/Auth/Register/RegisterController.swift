@@ -8,7 +8,7 @@
 import UIKit
 
 class RegisterViewController: BaseController {
-        
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "SocialApp"
@@ -237,7 +237,7 @@ class RegisterViewController: BaseController {
             loginBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
     }
-        
+    
     private func makeTextField(placeholder: String) -> UITextField {
         let tf = UITextField()
         tf.placeholder = placeholder
@@ -259,15 +259,21 @@ class RegisterViewController: BaseController {
     
     override func configureViewModel() {
         viewModel.onRegisterSuccess = { [weak self] in
-            DispatchQueue.main.async {
-                self?.coordinator?.didRegister(email: self?.viewModel.email ?? "")
-            }
+            self?.coordinator?.didRegister(email: self?.viewModel.email ?? "")
         }
         
         viewModel.onRegisterError = { [weak self] errorMessage in
-            DispatchQueue.main.async {
-                print(errorMessage)
-            }
+            let alert = AlertBuilder()
+                .setTitle("Hata")
+                .setMessage(errorMessage)
+                .setPrimaryButton("Tamam")
+                .build()
+            self?.present(alert, animated: true)
+        }
+        
+        viewModel.onLoading = { [weak self] isLoading in
+            self?.signUpBtn.isEnabled = !isLoading
+            self?.signUpBtn.alpha = isLoading ? 0.7 : 1.0
         }
     }
     
@@ -279,12 +285,14 @@ class RegisterViewController: BaseController {
     }
     
     @objc private func signUpTapped() {
+        view.endEditing(true)
         viewModel.email = emailTextField.text ?? ""
         viewModel.fullName = fullNameTextField.text ?? ""
         viewModel.username = usernameTextField.text ?? ""
         viewModel.password = passwordTextField.text ?? ""
         viewModel.register()
     }
+    
     
     @objc private func loginTapped() {
         coordinator?.goBack()
