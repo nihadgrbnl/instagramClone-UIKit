@@ -29,7 +29,7 @@ class MainCoordinator: Coordinator {
     func start() {
         let feedController = FeedController()
         feedNav = makeNav(root: feedController, title: "Home", image: "house", selectedImage: "house.fill")
-//        feedController.coordinator = self
+        feedController.coordinator = self
 
         let searchController = SearchController()
         searchNav = makeNav(root: searchController, title: "Search", image: "magnifyingglass", selectedImage: "magnifyingglass")
@@ -77,5 +77,10 @@ class MainCoordinator: Coordinator {
     
     func goBack() {
         dmNav?.popViewController(animated: true)
+    }
+    
+    func goToComments(postID: String) {
+        let commentController = CommentController(postID: postID)
+        feedNav?.show(commentController, sender: nil)
     }
 }

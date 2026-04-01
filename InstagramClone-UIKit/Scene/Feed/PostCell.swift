@@ -46,6 +46,7 @@ class PostCell: UITableViewCell {
         btn.tintColor = UIColor(resource: .igText)
         btn.widthAnchor.constraint(equalToConstant: 28).isActive = true
         btn.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        btn.addTarget(self, action: #selector(likeTapped), for: .touchUpInside)
         return btn
     }()
     
@@ -55,6 +56,7 @@ class PostCell: UITableViewCell {
         btn.tintColor = UIColor(resource: .igText)
         btn.widthAnchor.constraint(equalToConstant: 28).isActive = true
         btn.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        btn.addTarget(self, action: #selector(commentTapped), for: .touchUpInside)
         return btn
     }()
     
@@ -121,8 +123,10 @@ class PostCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureUI()
         configureConstraints()
-        
     }
+    
+    var onLikeTapped: (() -> Void)?
+    var onCommentTapped: (() -> Void)?
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -180,13 +184,26 @@ class PostCell: UITableViewCell {
         ])
     }
     
-    func configure(post: Post, user: User?) {
+    @objc private func likeTapped() {
+        onLikeTapped?()
+    }
+    
+    @objc private func commentTapped() {
+        onCommentTapped?()
+    }
+    
+    func configure(post: Post, user: User?, isLiked: Bool) {
         usernameLabel.text = user?.name ?? ""
         likesLabel.text = "\(post.likes) likes"
         timeLabel.text = post.timeStamp.timeAgoString()
         commentsLabel.isHidden = true
         avatarImageView.setImage(urlString: user?.profileImageURL)
         postImageView.setImage(urlString: post.imageURL, placeholder: nil)
+        
+        let heartIcon = isLiked ? "heart.fill" : "heart"
+        let heartColor : UIColor = isLiked ? .systemRed : UIColor(resource: .igText)
+        likeBtn.setImage(UIImage(systemName: heartIcon), for: .normal)
+        likeBtn.tintColor = heartColor
         
         if post.caption.isEmpty {
             captionLabel.isHidden = true
@@ -231,6 +248,10 @@ class PostCell: UITableViewCell {
         captionLabel.attributedText = nil
         captionLabel.isHidden = false
         timeLabel.text = nil
+        likeBtn.setImage(UIImage(systemName: "heart"), for: .normal)
+        likeBtn.tintColor = UIColor(resource: .igText)
+        onLikeTapped = nil
+        onCommentTapped = nil
     }
     
 }

@@ -14,5 +14,5 @@ struct Post: Codable, Identifiable {
     let caption: String
     let ownerUID: String
     let timeStamp: Date
-    let likes: Int
+    var likes: Int
 }

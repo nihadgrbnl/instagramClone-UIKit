@@ -28,6 +28,7 @@ class FeedController: BaseController {
     }()
     
     private let viewModel = FeedViewModel()
+    weak var coordinator: MainCoordinator?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,9 +86,20 @@ extension FeedController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: PostCell.identifier, for: indexPath) as? PostCell else {
             return UITableViewCell()
         }
+        
         let post = viewModel.posts[indexPath.row]
         let user = viewModel.users[post.ownerUID]
-        cell.configure(post: post, user: user)
+        let isLiked = viewModel.likedPostIDs.contains(post.id ?? "")
+        cell.configure(post: post, user: user, isLiked: isLiked)
+        
+        cell.onLikeTapped = { [weak self] in
+            self?.viewModel.toggleLike(post: post)
+        }
+        
+        cell.onCommentTapped = { [weak self] in
+            guard let postID = post.id else { return }
+            self?.coordinator?.goToComments(postID: postID)
+        }
         return cell
     }
 }

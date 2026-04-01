@@ -11,15 +11,19 @@ class FeedViewModel {
     
     var posts : [Post] = []
     var users: [String: User] = [:]
+    var likedPostIDs: Set<String> = []
     
     var onDataUpdated: (() -> Void)?
     var onError: ((AppError) -> Void)?
     var onLoading: ((Bool) -> Void)?
     
     private let repository: FeedRepository
+    private let interactionRepository: InteractionRepository
     
-    init(repository: FeedRepository = FirebaseFeedRepository()) {
+    init(repository: FeedRepository = FirebaseFeedRepository(),
+         interactionRepository: InteractionRepository = FirebaseInteractionRepostiory()) {
         self.repository = repository
+        self.interactionRepository = interactionRepository
     }
     
     func fetchPosts() {
@@ -38,6 +42,26 @@ class FeedViewModel {
         }
     }
     
+    func toggleLike(post: Post) {
+        guard let postID = post.id else { return }
+        let isLiked = likedPostIDs.contains(postID)
+        
+        if isLiked {
+            likedPostIDs.remove(postID)
+            if let index = posts.firstIndex(where: { $0.id == postID }) {
+                posts[index].likes -= 1
+            }
+            interactionRepository.unlikePost(postID: postID) { _ in }
+        } else {
+            likedPostIDs.insert(postID)
+            if let index = posts.firstIndex(where: { $0.id == postID }) {
+                posts[index].likes += 1
+            }
+            interactionRepository.likePost(postID: postID) { _ in }
+        }
+        onDataUpdated?()
+    }
+    
     private func fetchUsers(posts: [Post]) {
         let uids = Array(Set(posts.map{ $0.ownerUID }))
         let group = DispatchGroup()
@@ -53,7 +77,18 @@ class FeedViewModel {
         }
         
         group.notify(queue: .main) { [weak self] in
-            self?.onDataUpdated?()
+            self?.fetchLikedPostIDs()
+        }
+    }
+    
+    private func fetchLikedPostIDs() {
+        interactionRepository.fetchedLikedPostID { [weak self] result in
+            DispatchQueue.main.async {
+                if case .success(let ids) = result {
+                    self?.likedPostIDs = ids
+                }
+                self?.onDataUpdated?()
+            }
         }
     }
 }
