@@ -74,6 +74,6 @@ class CommentCell: UITableViewCell {
     func configure(comment: Comment) {
         usernameLabel.text = comment.ownerUsername
         commentLabel.text = comment.text
-        timeLabel.text = comment.timeStampt?.timeAgoString() ?? "Just Now"
+        timeLabel.text = comment.timeStamp?.timeAgoString() ?? "Just Now"
     }
 }

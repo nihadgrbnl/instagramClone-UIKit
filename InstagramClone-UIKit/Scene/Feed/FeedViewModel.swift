@@ -82,7 +82,7 @@ class FeedViewModel {
     }
     
     private func fetchLikedPostIDs() {
-        interactionRepository.fetchedLikedPostID { [weak self] result in
+        interactionRepository.fetchLikedPostIDs { [weak self] result in
             DispatchQueue.main.async {
                 if case .success(let ids) = result {
                     self?.likedPostIDs = ids

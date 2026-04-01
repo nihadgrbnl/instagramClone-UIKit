@@ -1,5 +1,5 @@
 //
-//  FirebaseInteractionRepostiory.swift
+//  FirebaseInteractionRepository.swift
 //  InstagramClone-UIKit
 //
 //  Created by Nihad Gurbanli on 01.04.26.
@@ -12,8 +12,8 @@ import FirebaseAuth
 class FirebaseInteractionRepostiory: InteractionRepository {
     
     private let db = Firestore.firestore()
-    private var currentUID: String? = Auth.auth().currentUser?.uid
-    
+    private var currentUID: String? { Auth.auth().currentUser?.uid }
+
     func likePost(postID: String, completion: @escaping (Result<Void, AppError>) -> Void) {
         guard let uid = currentUID else {
             completion(.failure(.noUser))
@@ -57,7 +57,7 @@ class FirebaseInteractionRepostiory: InteractionRepository {
         }
     }
     
-    func fetchedLikedPostID(completion: @escaping (Result<Set<String>, AppError>) -> Void) {
+    func fetchLikedPostIDs(completion: @escaping (Result<Set<String>, AppError>) -> Void) {
         guard let uid  = currentUID else {
             completion(.failure(.noUser))
             return
@@ -67,6 +67,7 @@ class FirebaseInteractionRepostiory: InteractionRepository {
             .getDocuments { snapshot, error in
                 if let error {
                     completion(.failure(.uploadFailed(error.localizedDescription)))
+                    return
                 }
                 let ids = Set(snapshot?.documents.map { $0.documentID } ?? [])
                 completion(.success(ids))
@@ -79,6 +80,7 @@ class FirebaseInteractionRepostiory: InteractionRepository {
             .getDocuments { snapshot, error in
                 if let error {
                     completion(.failure(.uploadFailed(error.localizedDescription)))
+                    return
                 }
                 let comments = snapshot?.documents.compactMap { try? $0.data(as: Comment.self) } ?? []
                 completion(.success(comments))
