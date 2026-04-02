@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import FirebaseAuth
 
 class AppCoordinator: Coordinator {
     
@@ -21,9 +22,8 @@ class AppCoordinator: Coordinator {
     }
     
     func start() {
-        let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
         
-        if isLoggedIn {
+        if Auth.auth().currentUser != nil {
             showMainFlow()
         } else {
             showAuthFlow()

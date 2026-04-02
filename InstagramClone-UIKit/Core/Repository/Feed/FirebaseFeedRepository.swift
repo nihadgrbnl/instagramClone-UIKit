@@ -15,6 +15,7 @@ class FirebaseFeedRepository : FeedRepository {
     func fetchPosts(completion: @escaping (Result<[Post], AppError>) -> Void) {
         db.collection("posts")
             .order(by: "timeStamp", descending: true)
+            .limit(to: 20)
             .getDocuments { snapshot, error in
                 if let error {
                     completion(.failure(.uploadFailed(error.localizedDescription)))

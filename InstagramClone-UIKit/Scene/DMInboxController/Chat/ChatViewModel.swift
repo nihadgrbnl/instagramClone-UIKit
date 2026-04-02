@@ -32,6 +32,10 @@ class ChatViewModel {
         self.localRepository = localRepository
     }
     
+    deinit {
+        repository.removeMessageListener()
+    }
+    
     func fetchUsers(otherUserID: String) {
         repository.fetchUsers(otherUserID: otherUserID) { [weak self] fetchedCurrentUser, fetchedChatUser in
             self?.currentUser = fetchedCurrentUser

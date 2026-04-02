@@ -15,6 +15,7 @@ class FirebaseRepository : ChatRepository {
     
     private var db = Firestore.firestore()
     private let localRepository = MessageLocalRepository()
+    private var messageListener: ListenerRegistration?
     
     var currentUserID : String {
         return Auth.auth().currentUser?.uid ?? ""
@@ -70,36 +71,33 @@ class FirebaseRepository : ChatRepository {
     }
     
     func listenForMessages(chatID: String, completion: @escaping () -> Void) {
-        db.collection("chats").document(chatID).collection("messages").order(by: "timeStamp").addSnapshotListener { snapshot, error in
-            guard let documents = snapshot?.documents else {
-                completion()
-                return
-            }
-            
-            
-            snapshot?.documentChanges.forEach { change in
-                if change.type == .added {
-                    if let message = FirebaseAdapter.toMessage(document: change.document) {
-                        
-                        print("☁️ FIREBASE: Yeni mesaj ağdan geldi -> Core Data'ya kaydediliyor...")
-                        
-                        //Get audio file from firebase storage
-                        //                        var audioFileFromFirebaseStorage = "AudioFileFirebaseStorage"
-                        
-                        //Elave funksiya, audio  yazirsan file storage (device)
-                        //                        var newPath = "newPath" //write function return newPath of audioFile
-                        
-                        //Write to local database (id, filepath, audio)
-                        //                        var entity = "messageId, audioFileFromFirebaseStorage, newPath"
-                        
-                        
-                        self.localRepository.save(chatID: chatID, model: message)
+        messageListener = db.collection("chats")
+            .document(chatID)
+            .collection("messages")
+            .order(by: "timeStamp")
+            .limit(toLast: 50)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                guard let documents = snapshot?.documents else {
+                    completion()
+                    return
+                }
+                
+                snapshot?.documentChanges.forEach { change in
+                    if change.type == .added {
+                        if let message = FirebaseAdapter.toMessage(document: change.document) {
+                            print("FIREBASE: Yeni mesaj ağdan geldi -> Core Data'ya kaydediliyor...")
+                            self.localRepository.save(chatID: chatID, model: message)
+                        }
                     }
                 }
+                completion()
             }
-            completion()
-        }
-        
+    }
+    
+    func removeMessageListener() {
+        messageListener?.remove()
+        messageListener = nil
     }
     
     func sendMessages(type: MessageType, content: String, chatID: String, duration: Double?, currentUser: User, chatUser: User, completion: @escaping (Bool, (any Error)?) -> Void) {
